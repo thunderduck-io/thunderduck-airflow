@@ -1,0 +1,48 @@
+---
+package-name: thunderduck-airflow
+name: Thunderduck
+description: |
+  Run SQL on `Thunderduck <https://thunderduck.ai>`__, wait for the stored
+  result, cancel cleanly and hand off the Parquet export.
+versions:
+  - 0.1.0
+
+integrations:
+  - integration-name: Thunderduck
+    external-doc-url: https://docs.thunderduck.ai/clients/airflow
+    tags: [software]
+
+hooks:
+  - integration-name: Thunderduck
+    python-modules:
+      - thunderduck_airflow.hooks.thunderduck
+
+operators:
+  - integration-name: Thunderduck
+    python-modules:
+      - thunderduck_airflow.operators.query
+      - thunderduck_airflow.operators.query_async
+
+sensors:
+  - integration-name: Thunderduck
+    python-modules:
+      - thunderduck_airflow.sensors.execution
+
+triggers:
+  - integration-name: Thunderduck
+    python-modules:
+      - thunderduck_airflow.triggers.execution
+
+connection-types:
+  - hook-class-name: thunderduck_airflow.hooks.thunderduck.ThunderduckHook
+    hook-name: Thunderduck
+    connection-type: thunderduck
+    ui-field-behaviour:
+      hidden-fields:
+        - schema
+        - login
+      relabeling:
+        host: API endpoint
+        password: API token
+      placeholders:
+        host: api.thunderduck.ai

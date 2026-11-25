@@ -1,0 +1,55 @@
+# Tests for thunderduck-airflow, run on every push and pull request.
+# No publishing and no secrets: releases are cut from Thunderduck's internal
+# source, not from this mirror. See CONTRIBUTING.md.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The floor (3.0, Python 3.11) and the newest pair. Airflow 3.0 does
+          # not support 3.13, which is why the newest leg is separate.
+          - python: "3.11"
+            airflow: "3.0.0"
+          - python: "3.12"
+            airflow: "3.4.0"
+          - python: "3.13"
+            airflow: "3.4.0"
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv venv --python ${{ matrix.python }}
+
+      - name: Install
+        run: uv pip install -e . "apache-airflow==${{ matrix.airflow }}" pytest ruff
+
+      - name: Show resolved versions
+        run: |
+          uv run --no-sync python -c "import airflow, sys; print('python', sys.version.split()[0]); print('airflow', airflow.__version__)"
+
+      - name: Lint
+        run: |
+          uv run --no-sync ruff check .
+          uv run --no-sync ruff format --check .
+
+      - name: Test
+        env:
+          AIRFLOW_HOME: ${{ runner.temp }}/airflow
+        run: uv run --no-sync pytest -q

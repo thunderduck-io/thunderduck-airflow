@@ -1,0 +1,63 @@
+[project]
+name = "thunderduck-airflow"
+version = "0.1.0"
+description = "Apache Airflow provider for Thunderduck: run SQL, wait for the stored result, cancel cleanly and hand off Parquet."
+readme = "README.md"
+authors = [
+    { name = "YILDIRIM ADIGUZEL", email = "developer@thunderduck.io" }
+]
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["airflow", "thunderduck", "duckdb", "iceberg", "lakehouse", "provider"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Apache Airflow",
+    "Framework :: Apache Airflow :: Provider",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+]
+# Airflow 2 reached end of life on 2026-04-22; this provider targets the 3.x
+# line only, which also keeps it free of the 2.x compatibility shims.
+dependencies = [
+    "apache-airflow>=3.0,<4",
+    "httpx>=0.27",
+    # Airflow already ships PyYAML; declared because provider.py imports it
+    # directly to read provider.yaml.
+    "pyyaml>=6.0",
+]
+
+[project.urls]
+Homepage = "https://thunderduck.ai"
+Documentation = "https://docs.thunderduck.ai/clients/airflow"
+Source = "https://github.com/thunderduck-io/thunderduck-airflow"
+Issues = "https://github.com/thunderduck-io/thunderduck-airflow/issues"
+
+# Airflow's provider manager reads this entry point: it is what makes
+# `conn_type=thunderduck` appear in the connection UI and `airflow providers
+# list` show the provider.
+[project.entry-points."apache_airflow_provider"]
+provider_info = "thunderduck_airflow.provider:get_provider_info"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.8.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
